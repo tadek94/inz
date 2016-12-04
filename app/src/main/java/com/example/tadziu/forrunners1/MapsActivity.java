@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
@@ -53,7 +54,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-
+import static java.lang.Math.cos;
+import static java.lang.Math.sqrt;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
@@ -63,12 +65,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //TextView sprawdzenie = (TextView) findViewById(R.id.sprawdzenie);
 
+    public double distance = 0;
     public static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
     GoogleApiClient mGoogleApiClient;
     LatLng firstLocation;
     Marker mCurrLocationMarker;
     private LocationRequest mLocationRequest;
+    double promienR = 6371;
+    TextView odleglosc;
 
 
   //  LatLng firstLatLon = null;
@@ -109,6 +114,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .setFastestInterval(1 * 1000); // 1 second, in milliseconds
 
         points = new ArrayList<LatLng>();
+        odleglosc = (TextView) findViewById(R.id.odleglosc);
     }
 
 
@@ -140,10 +146,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-//        // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(-34, 151);
-//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
 
 
     protected synchronized void buildGoogleApiClient() {
@@ -181,6 +184,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+
     private void handleNewLocation(Location location) {
         Log.d(TAG, location.toString());
 
@@ -197,7 +201,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        mMap.addMarker(options);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15)); // 15 optymalne
+        if (points.size() > 1) {
+            int dlugoscListy = points.size();
+            LatLng start = points.get(dlugoscListy-2);
+            LatLng stop = points.get(dlugoscListy-1);
+            distance =distance + getDystance(start,stop);
+            odleglosc.setText("Odleglosc: " + Double.toString(distance));
+        }
         draw();
+    }
+//do obliczania długosci
+    public double getDystance(LatLng szerDluPocz, LatLng szerDluKoncowa)
+    {
+
+        double szerPocz = szerDluPocz.latitude;//start
+        double dluPocz = szerDluPocz.longitude;//strat
+
+        double szerKon = szerDluKoncowa.latitude;//stop
+        double dluKon = szerDluKoncowa.longitude;//stop
+
+        double roznicaSzer = szerPocz - szerKon;
+        double roznicaDlu = dluPocz - dluKon;
+
+
+        //odleglosc.setText("szerokosc:" + Double.toString(roznicaSzer)+ " dlugosc:"+ Double.toString(roznicaDlu));
+
+        double poziomo = (roznicaDlu*6.283184/360)*promienR*cos(szerPocz*6.283184/360);
+        double pionowo = promienR*roznicaSzer*6.283184/360;
+
+        double dystans = sqrt(poziomo*poziomo+pionowo*pionowo);
+
+        return dystans;
+
+
     }
 
     @Override
