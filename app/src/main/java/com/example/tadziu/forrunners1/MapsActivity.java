@@ -73,7 +73,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Marker mCurrLocationMarker;
     private LocationRequest mLocationRequest;
     double promienR = 6371;
-    TextView odleglosc;
+    TextView odleglosc; // do widoku
 
 
   //  LatLng firstLatLon = null;
