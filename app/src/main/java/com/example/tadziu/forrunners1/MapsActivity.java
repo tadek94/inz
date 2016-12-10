@@ -1,17 +1,21 @@
 package com.example.tadziu.forrunners1;
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +39,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.Polyline;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 import android.content.IntentSender;
@@ -74,6 +81,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationRequest mLocationRequest;
     double promienR = 6371;
     TextView odleglosc; // do widoku
+    Button zapisz = (Button) findViewById(R.id.zapiszTrase);
+    Ekran ekran;
+    BaseManager baseManager;
 
 
   //  LatLng firstLatLon = null;
@@ -344,6 +354,87 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+
+    Bitmap ekranBitmap;
+    private static final int PERMS_REQUEST_CODE = 123;
+
+    //zrobienie zdj trasy i zapis do bazy danych
+    public void onClickZapiszTrase(View view)
+    {
+        View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
+
+        ekranBitmap = ekran.getScreenShot(rootView);
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ekranBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+        //zapis do bazy danych
+        baseManager.dodajTrase("test1",distance,distance,byteArray);
+
+
+    }
+
+
+    //////////////////////////////////////////
+    //zapis do pliku
+
+//    private void saveScreenshot(Bitmap bm) {
+//
+//        ByteArrayOutputStream bao = null;
+//        File file = null;
+//
+//        try {
+//            //kompresja i zapis strumienia zewnetrznego
+//
+//            bao = new ByteArrayOutputStream();
+//            bm.compress(Bitmap.CompressFormat.PNG, 90, bao);
+//
+//            //zapis obrazka na kartę SD
+//            file = new File(Environment.getExternalStorageDirectory() + File.separator+"czlowiek_1.png");
+//            file.createNewFile();
+//
+//            FileOutputStream fos = new FileOutputStream(file);
+//            fos.write(bao.toByteArray());
+//            fos.close();
+//
+//        } catch (Exception e) {
+//
+//            e.printStackTrace();
+//        }
+//
+//    }
+//
+//    private boolean hasPermission() {
+//        int res = 0;
+//
+//        String[] permission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+//
+//        for (String perms : permission) {
+//
+//            res = checkCallingOrSelfPermission(perms);
+//            if (!(res == PackageManager.PERMISSION_GRANTED)) {
+//
+//                return false;
+//            }
+//
+//        }
+//
+//        return true;
+//
+//    }
+//
+//
+//    private void requestPermis() {
+//        String[] permission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//
+//            requestPermissions(permission, PERMS_REQUEST_CODE);
+//        }
+//
+//    }
+
+////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
