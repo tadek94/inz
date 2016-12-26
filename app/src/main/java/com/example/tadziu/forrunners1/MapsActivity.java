@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +31,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.SnapshotReadyCallback;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -42,7 +44,10 @@ import com.google.android.gms.maps.model.Polyline;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import android.content.IntentSender;
 import android.location.Location;
@@ -81,9 +86,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationRequest mLocationRequest;
     double promienR = 6371;
     TextView odleglosc; // do widoku
-    Button zapisz = (Button) findViewById(R.id.zapiszTrase);
-    Ekran ekran;
+    //Button zapisz = (Button) findViewById(R.id.zapiszTrase);
+    Ekran ekran = new Ekran();
     BaseManager baseManager;
+    long czasStrt;
+    long czasStop;
 
 
   //  LatLng firstLatLon = null;
@@ -96,6 +103,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleApiClient client;
 
     LocationManager locationManager;
+    private View view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +133,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         points = new ArrayList<LatLng>();
         odleglosc = (TextView) findViewById(R.id.odleglosc);
+        baseManager = new BaseManager(this);
+        czasStrt = System.currentTimeMillis();
     }
 
 
@@ -216,7 +226,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LatLng start = points.get(dlugoscListy-2);
             LatLng stop = points.get(dlugoscListy-1);
             distance =distance + getDystance(start,stop);
-            odleglosc.setText("Odleglosc: " + Double.toString(distance));
+            odleglosc.setText("Odleglosc: " + Double.toString(distance).substring(0,5)+ " km");
         }
         draw();
     }
@@ -245,6 +255,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }
+
+
 
     @Override
     public void onConnectionSuspended(int i) {
@@ -359,21 +371,74 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int PERMS_REQUEST_CODE = 123;
 
     //zrobienie zdj trasy i zapis do bazy danych
+
     public void onClickZapiszTrase(View view)
     {
-        View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
+        this.view = view;
+        View layout1 = getWindow().getDecorView().findViewById(android.R.id.content);
+        //final RelativeLayout layout1 = (RelativeLayout) findViewById(R.id.mojlayout);
 
-        ekranBitmap = ekran.getScreenShot(rootView);
+        czasStop = System.currentTimeMillis();
+        long czasBiegania = czasStop-czasStrt;
+        double godz = (czasBiegania/ (1000*60*60));
+        if(layout1 != null) {
 
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        ekranBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        byte[] byteArray = stream.toByteArray();
-        //zapis do bazy danych
-        baseManager.dodajTrase("test1",distance,distance,byteArray);
+            String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+            ekranBitmap = ekran.getScreenShot(layout1);
+
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            ekranBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+            //zapis do bazy danych
+            double szybkosc = distance/godz;
+            baseManager.dodajTrase(date, distance, szybkosc, byteArray);
+
+            //CaptureScreen();
+            Toast toast = Toast.makeText(this, "Zapisano do bazy", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+        else
+        {
+            Toast toast = Toast.makeText(this, "bład", Toast.LENGTH_SHORT);
+            toast.show();
+        }
 
 
     }
 
+    private void CaptureScreen() {
+
+            SnapshotReadyCallback callback = new SnapshotReadyCallback() {
+                Bitmap bitmap=null;
+
+                @Override
+                public void onSnapshotReady(Bitmap snapshot) {
+                    // TODO Auto-generated method stub
+                    bitmap = snapshot;
+                    try {
+                        saveImage(bitmap);
+                        Toast.makeText(getApplicationContext(), "Image Saved", Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                private void saveImage(Bitmap bitmap) throws IOException {
+                    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 40, bytes);
+                    File f = new File(getFilesDir(), "test.png");
+                    //File f = new File(Environment.getExternalStorageDirectory() + File.separator + "test.png");
+                    f.createNewFile();
+                    FileOutputStream fo = new FileOutputStream(f);
+                    fo.write(bytes.toByteArray());
+                    fo.close();
+
+                }
+            };
+
+            mMap.snapshot(callback);
+
+    }
 
     //////////////////////////////////////////
     //zapis do pliku

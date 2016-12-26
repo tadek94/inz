@@ -14,22 +14,36 @@ public class MainActivity extends Activity {
     boolean bieganie;
     boolean rower;
     Button przyciskBieganie;
+    Button przyciskMojeTrasy;
     Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        przyciskBieganie = (Button) findViewById(R.id.butBieganie);
-        View.OnClickListener listener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            context = getApplicationContext();
-            Intent intent = new Intent(context, MapsActivity.class);
-            startActivity(intent);
-        }
-    };
-        przyciskBieganie.setOnClickListener(listener);
+//        przyciskBieganie = (Button) findViewById(R.id.butBieganie);
+//        //przyciskMojeTrasy = (Button) findViewById(R.id.mojeTrasy);
+//        View.OnClickListener listener = new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//            context = getApplicationContext();
+//            Intent intent = new Intent(context, MapsActivity.class);
+//            startActivity(intent);
+//        }
+//    };
+//        przyciskBieganie.setOnClickListener(listener);
 
+    }
+
+    public void onClickBieganie(View view)
+    {
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
+
+    }
+    public void onClickMojeTrasy(View view)
+    {
+        Intent intent = new Intent(this, Trasy.class);
+        startActivity(intent);
     }
 }

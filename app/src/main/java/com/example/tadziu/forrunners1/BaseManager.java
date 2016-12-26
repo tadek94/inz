@@ -12,7 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class BaseManager extends SQLiteOpenHelper {
 
     private static final String DataBase_Name = "Trasy";
-    private static final int DataBase_Version = 1;
+    private static final int DataBase_Version = 2;
 
     BaseManager(Context context) {
         super(context, DataBase_Name, null, DataBase_Version);
@@ -22,15 +22,17 @@ public class BaseManager extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE MOJETRASY (_id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "OPIS TEXT,"
-                + "ODLEGLOSC REAL,"
-                + "PREDKOSC REAL"
+                + "OPIS TEXT, "
+                + "ODLEGLOSC REAL, "
+                + "PREDKOSC REAL, "
                 + "ZDJECIE BLOB);");
 
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+
 
     }
 
@@ -42,9 +44,13 @@ public class BaseManager extends SQLiteOpenHelper {
         wartosci.put("ODLEGLOSC", odleglosc);
         wartosci.put("PREDKOSC", predkosc);
         wartosci.put("ZDJECIE", zdj);
-        db.insertOrThrow("MOJETRASY", null, wartosci);
+        db.insert("MOJETRASY", null, wartosci);
 
     }
+
+
+
+
 
 
 }
