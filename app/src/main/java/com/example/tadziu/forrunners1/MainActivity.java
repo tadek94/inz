@@ -46,4 +46,9 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(this, Trasy.class);
         startActivity(intent);
     }
+    public void onClickTreningi(View view)
+    {
+        Intent intent = new Intent(this, TreningiActivity.class);
+        startActivity(intent);
+    }
 }
