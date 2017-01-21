@@ -1,5 +1,6 @@
 package com.example.tadziu.forrunners1;
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -8,6 +9,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -17,6 +19,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -86,11 +89,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationRequest mLocationRequest;
     double promienR = 6371;
     TextView odleglosc; // do widoku
+    TextView cal;
     //Button zapisz = (Button) findViewById(R.id.zapiszTrase);
     Ekran ekran = new Ekran();
     BaseManager baseManager;
     long czasStrt;
     long czasStop;
+
 
 
   //  LatLng firstLatLon = null;
@@ -102,9 +107,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     private GoogleApiClient client;
 
+
     LocationManager locationManager;
     private View view;
 
+    Kalorie kalorie = new Kalorie();
+
+    static final int requestcode = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -128,13 +137,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Create the LocationRequest object
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(10 * 1000)        // 10 seconds, in milliseconds
-                .setFastestInterval(1 * 1000); // 1 second, in milliseconds
+                .setInterval(10 * 1000)        // 10 second
+                .setFastestInterval(1 * 1000); // 1 second
 
         points = new ArrayList<LatLng>();
         odleglosc = (TextView) findViewById(R.id.odleglosc);
+        cal = (TextView) findViewById(R.id.kalorie);
         baseManager = new BaseManager(this);
         czasStrt = System.currentTimeMillis();
+
+
+
     }
 
 
@@ -177,7 +190,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .build();
         mGoogleApiClient.connect();
 
-    }
+    }// dodane connect
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
@@ -226,7 +239,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LatLng start = points.get(dlugoscListy-2);
             LatLng stop = points.get(dlugoscListy-1);
             distance =distance + getDystance(start,stop);
-            odleglosc.setText("Odleglosc: " + Double.toString(distance).substring(0,5)+ " km");
+            odleglosc.setText(Double.toString(distance).substring(0,5)+ " km");
+            cal.setText(Double.toString(kalorie.spaloneKalorieBieganie(distance,70)).substring(0,5) + "kcal");
         }
         draw();
     }
@@ -367,11 +381,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    Bitmap ekranBitmap;
+    Bitmap bitmapZdj;
     private static final int PERMS_REQUEST_CODE = 123;
 
     //zrobienie zdj trasy i zapis do bazy danych
 
+    public void onClickZdj(View view)
+    {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if(intent.resolveActivity(getPackageManager())!=null)
+        {
+            startActivityForResult(intent,requestcode );
+        }
+    }
+
+    public void onActivityResult(int reqcode, int resultcode, Intent data)
+    {
+        if(reqcode == requestcode)
+        {
+            if(resultcode == RESULT_OK)
+            {
+                Bundle b = new Bundle();
+                b = data.getExtras();
+                bitmapZdj = (Bitmap) b.get("data");
+
+            }
+        }
+
+    }
     public void onClickZapiszTrase(View view)
     {
         this.view = view;
@@ -384,10 +421,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if(layout1 != null) {
 
             String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-            ekranBitmap = ekran.getScreenShot(layout1);
+            //ekranBitmap = ekran.getScreenShot(layout1);
 
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            ekranBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            bitmapZdj.compress(Bitmap.CompressFormat.PNG, 100, stream);
             byte[] byteArray = stream.toByteArray();
             //zapis do bazy danych
             double szybkosc = distance/godz;

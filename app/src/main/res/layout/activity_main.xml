@@ -60,6 +60,19 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
 
+        <Button
+            android:text="TRENINGI"
+            android:textSize="25dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/treningi"
+            android:onClick="onClickMojeTrasy"
+            android:background="@android:color/transparent"
+            android:textColor="#FFFFFF"
+            android:layout_below="@+id/mojeTrasy"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
     </LinearLayout>
 
 

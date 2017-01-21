@@ -35,18 +35,19 @@ public class Trasa extends AppCompatActivity {
             if (cursor.moveToFirst())
             {
                 String opisB = cursor.getString(0);
-                int odlegloscB = cursor.getInt(1);
-                int predkoscB = cursor.getInt(2);
+                //int odlegloscB = cursor.getInt(1);
+                float odlegloscB = cursor.getFloat(1);
+                float predkoscB = cursor.getFloat(2);
                 byte[] zdjB = cursor.getBlob(3);
 
                 TextView opis = (TextView)findViewById(R.id.opis);
                 opis.setText(opisB);
 
                 TextView odleglosc = (TextView)findViewById(R.id.odleglosc);
-                odleglosc.setText(Integer.toString(odlegloscB));
+                odleglosc.setText("Odleglosc: "+Float.toString(odlegloscB).substring(0,5));
 
                 TextView predkosc = (TextView)findViewById(R.id.predkosc);
-                predkosc.setText(Integer.toString(predkoscB));
+                predkosc.setText("Predkosc: "+Float.toString(predkoscB).substring(0,5));
 
 
                 Bitmap bmp = BitmapFactory.decodeByteArray(zdjB, 0, zdjB.length);
